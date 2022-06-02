@@ -3,6 +3,7 @@ const router = require("express").Router();
 const res = require("express/lib/response");
 const User = require("../modals/User")
 const CryptoJS = require("crypto-js");
+const jwt = require("json")
 
 
 // Register
@@ -27,18 +28,38 @@ router.post("/login" , async (req,res) =>{
     try{
         const user = await User.findOne({username:req.body.username});
         console.log(user);
-        user && res.status(200).json(user);
+        if(user){
+             const hashedPassword = CryptoJS.AES.decrypt(
+               user.password,
+               process.env.PASS_SEC
+             );
+             const password = hashedPassword.toString(CryptoJS.enc.Utf8);
+             console.log(password);
+             console.log(req.body.pass);
+             if( password === req.body.password){
+                  res.status(200).json(user);
+                  const accessToken = jwt.sign({
+                      id:user._id,isAdmin:user.isAdmin,
+                  })
 
-        const hashedPassword = CryptoJS.AES.decrypt(user.password,process.env.PASS_SEC);
+             }
+             else{
+                   res.status(401).json("Wrong Credentials");
+
+             }
+            
+  
+
+        }
+        else{
+            res.status(401).json("wrong credentials name");
+
+        }
        
-         const password = hashedPassword.toString(CryptoJS.enc.Utf8); 
-         console.log(password)
-     
-         password !== req.body.password
-           ? res.status(401).json("Wrong Credentials")
-           : res.status(200).json(user);
 
- 
+       
+
+       
 
     }
     catch(error){
