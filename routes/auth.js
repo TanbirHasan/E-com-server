@@ -3,7 +3,7 @@ const router = require("express").Router();
 const res = require("express/lib/response");
 const User = require("../modals/User")
 const CryptoJS = require("crypto-js");
-const jwt = require("json")
+const jwt = require("jsonwebtoken")
 
 
 // Register
@@ -37,10 +37,20 @@ router.post("/login" , async (req,res) =>{
              console.log(password);
              console.log(req.body.pass);
              if( password === req.body.password){
-                  res.status(200).json(user);
+
+              
+                
                   const accessToken = jwt.sign({
                       id:user._id,isAdmin:user.isAdmin,
-                  })
+                  },
+                  
+                  process.env.JWT_SEC,
+                  {expiresIn : "3d"}
+
+                  
+                  )
+                   const {password,...others} = user._doc;
+                    res.status(200).json({ ...others, accessToken });
 
              }
              else{
