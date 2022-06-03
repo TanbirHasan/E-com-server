@@ -23,6 +23,9 @@ const verfiyToken = (req,res,next) => {
 }
 
 
+
+
+
 const verfiyTokenAndAuthorization = (req,res,next) => {
     verfiyToken(req.res,() => {
             if (req.user.id === req.params.id || req.user.isAdmin) {
@@ -34,4 +37,20 @@ const verfiyTokenAndAuthorization = (req,res,next) => {
     })
 }
 
-module.exports = {verfiyToken,verfiyTokenAndAuthorization}
+const verfiyTokenAndAdmin = (req, res, next) => {
+  verfiyToken(req.res, () => {
+    if (req.user.isAdmin) {
+      next();
+    } else {
+      res.status(403).json("You are not allowed to do that");
+    }
+  });
+};
+
+
+
+module.exports = {
+  verfiyToken,
+  verfiyTokenAndAuthorization,
+  verfiyTokenAndAdmin,
+};
